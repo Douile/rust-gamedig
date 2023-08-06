@@ -3,8 +3,8 @@ use crate::{
     socket::{Socket, UdpSocket},
     valve_master_server::{Region, SearchFilters},
     GDErrorContext,
-    GDErrorKind::PacketBad,
     GDResult,
+    PacketError::PacketBad,
 };
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};

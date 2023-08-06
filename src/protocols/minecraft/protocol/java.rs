@@ -6,8 +6,9 @@ use crate::{
     },
     socket::{Socket, TcpSocket},
     GDErrorContext,
-    GDErrorKind::{JsonParse, PacketBad},
+    GDErrorKind::JsonParse,
     GDResult,
+    PacketError::PacketBad,
 };
 
 use std::net::SocketAddr;

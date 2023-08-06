@@ -9,16 +9,8 @@ pub type GDResult<T> = Result<T, GDError>;
 /// GameDig Error.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GDErrorKind {
-    /// The received packet was bigger than the buffer size.
-    PacketOverflow,
-    /// The received packet was shorter than the expected one.
-    PacketUnderflow,
-    /// The received packet is badly formatted.
-    PacketBad,
-    /// Couldn't send the packet.
-    PacketSend,
-    /// Couldn't send the receive.
-    PacketReceive,
+    /// Packet errors
+    Packet(PacketError),
     /// Couldn't decompress data.
     Decompress,
     /// Couldn't create a socket connection.
@@ -39,6 +31,24 @@ pub enum GDErrorKind {
     JsonParse,
     /// Couldn't parse a value.
     TypeParse,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PacketError {
+    /// The received packet was bigger than the buffer size.
+    PacketOverflow,
+    /// The received packet was shorter than the expected one.
+    PacketUnderflow,
+    /// The received packet is badly formatted.
+    PacketBad,
+    /// Couldn't send the packet.
+    PacketSend,
+    /// Couldn't send the receive.
+    PacketReceive,
+}
+
+impl From<PacketError> for GDErrorKind {
+    fn from(value: PacketError) -> Self { GDErrorKind::Packet(value) }
 }
 
 /// Allow converting a type to GDError with "context" (a source error)
@@ -62,8 +72,14 @@ impl<T: GDErrorContext> From<T> for GDError {
     fn from(value: T) -> Self { value.raw_context(None) }
 }
 
-impl GDErrorContext for GDErrorKind {
-    fn raw_context(self, source: Option<Box<dyn std::error::Error + 'static>>) -> GDError { GDError::new(self, source) }
+// impl GDErrorContext for GDErrorKind {
+// fn raw_context(self, source: Option<Box<dyn std::error::Error + 'static>>) ->
+// GDError { GDError::new(self, source) } }
+
+impl<T: Into<GDErrorKind>> GDErrorContext for T {
+    fn raw_context(self, source: Option<Box<dyn std::error::Error + 'static>>) -> GDError {
+        GDError::new(self.into(), source)
+    }
 }
 
 type ErrorSource = Box<dyn std::error::Error + 'static>;
@@ -76,23 +92,23 @@ type ErrorSource = Box<dyn std::error::Error + 'static>;
 /// Directly from an [error kind](crate::errors::GDErrorKind) (without a source)
 ///
 /// ```
-/// use gamedig::{GDError, GDErrorKind, GDErrorContext};
-/// let _: GDError = GDErrorKind::PacketBad.into();
+/// use gamedig::{GDError, PacketError, GDErrorContext};
+/// let _: GDError = PacketError::PacketBad.into();
 /// ```
 ///
-/// [From an error kind with a source](crate::errors::GDErrorKind::context) (any
-/// type that implements `Into<Box<dyn std::error::Error + 'static>>)
+/// [From an error kind with a source](crate::errors::GDErrorContext::context)
+/// (any type that implements `Into<Box<dyn std::error::Error + 'static>>)
 ///
 /// ```
-/// use gamedig::{GDError, GDErrorKind, GDErrorContext};
-/// let _: GDError = GDErrorKind::PacketBad.context("Reason the packet was bad");
+/// use gamedig::{GDError, PacketError, GDErrorContext};
+/// let _: GDError = PacketError::PacketBad.context("Reason the packet was bad");
 /// ```
 ///
 /// Using the [new helper](crate::errors::GDError::new)
 ///
 /// ```
-/// use gamedig::{GDError, GDErrorKind};
-/// let _: GDError = GDError::new(GDErrorKind::PacketBad, Some("Reason the packet was bad".into()));
+/// use gamedig::{GDError, PacketError};
+/// let _: GDError = GDError::new(PacketError::PacketBad.into(), Some("Reason the packet was bad".into()));
 /// ```
 pub struct GDError {
     pub kind: GDErrorKind,

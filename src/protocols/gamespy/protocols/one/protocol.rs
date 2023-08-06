@@ -12,8 +12,8 @@ use crate::{
     },
     socket::{Socket, UdpSocket},
     GDErrorContext,
-    GDErrorKind,
     GDResult,
+    PacketError,
 };
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -66,7 +66,7 @@ fn get_server_values(
             match split.len() {
                 1 => (),
                 2 => part = split[1].parse().map_err(|e| TypeParse.context(e))?,
-                _ => Err(GDErrorKind::PacketBad)?, /* the queryid can't be splitted in more than 2
+                _ => Err(PacketError::PacketBad)?, /* the queryid can't be splitted in more than 2
                                                     * elements */
             };
         }
@@ -74,13 +74,13 @@ fn get_server_values(
         server_values.remove("queryid");
 
         if received_query_id.is_some() && received_query_id != query_id {
-            return Err(GDErrorKind::PacketBad.into()); // wrong query id!
+            return Err(PacketError::PacketBad.into()); // wrong query id!
         } else {
             received_query_id = query_id;
         }
 
         match parts.contains(&part) {
-            true => Err(GDErrorKind::PacketBad)?,
+            true => Err(PacketError::PacketBad)?,
             false => parts.push(part),
         }
     }
@@ -131,37 +131,37 @@ fn extract_players(server_vars: &mut HashMap<String, String>, players_maximum: u
                 None => {
                     player_data
                         .get("playername")
-                        .ok_or(GDErrorKind::PacketBad)?
+                        .ok_or(PacketError::PacketBad)?
                         .clone()
                 }
             },
             team: player_data
                 .get("team")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .trim()
                 .parse()
                 .map_err(|e| TypeParse.context(e))?,
             ping: player_data
                 .get("ping")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .trim()
                 .parse()
                 .map_err(|e| TypeParse.context(e))?,
             face: player_data
                 .get("face")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .clone(),
             skin: player_data
                 .get("skin")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .clone(),
             mesh: player_data
                 .get("mesh")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .clone(),
             score: player_data
                 .get("frags")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .trim()
                 .parse()
                 .map_err(|e| TypeParse.context(e))?,
@@ -175,7 +175,7 @@ fn extract_players(server_vars: &mut HashMap<String, String>, players_maximum: u
             },
             secret: player_data
                 .get("ngsecret")
-                .ok_or(GDErrorKind::PacketBad)?
+                .ok_or(PacketError::PacketBad)?
                 .to_lowercase()
                 .parse()
                 .map_err(|e| TypeParse.context(e))?,
@@ -204,7 +204,7 @@ pub fn query(address: &SocketAddr, timeout_settings: Option<TimeoutSettings>) ->
 
     let players_maximum = server_vars
         .remove("maxplayers")
-        .ok_or(GDErrorKind::PacketBad)?
+        .ok_or(PacketError::PacketBad)?
         .parse()
         .map_err(|e| TypeParse.context(e))?;
     let players_minimum = match server_vars.remove("minplayers") {
@@ -217,10 +217,10 @@ pub fn query(address: &SocketAddr, timeout_settings: Option<TimeoutSettings>) ->
     Ok(Response {
         name: server_vars
             .remove("hostname")
-            .ok_or(GDErrorKind::PacketBad)?,
+            .ok_or(PacketError::PacketBad)?,
         map: server_vars
             .remove("mapname")
-            .ok_or(GDErrorKind::PacketBad)?,
+            .ok_or(PacketError::PacketBad)?,
         map_title: server_vars.remove("maptitle"),
         admin_contact: server_vars.remove("AdminEMail"),
         admin_name: server_vars
@@ -229,10 +229,10 @@ pub fn query(address: &SocketAddr, timeout_settings: Option<TimeoutSettings>) ->
         has_password: has_password(&mut server_vars)?,
         game_type: server_vars
             .remove("gametype")
-            .ok_or(GDErrorKind::PacketBad)?,
+            .ok_or(PacketError::PacketBad)?,
         game_version: server_vars
             .remove("gamever")
-            .ok_or(GDErrorKind::PacketBad)?,
+            .ok_or(PacketError::PacketBad)?,
         players_maximum,
         players_online: players.len(),
         players_minimum,

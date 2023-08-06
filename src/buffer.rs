@@ -1,7 +1,6 @@
 use crate::errors::GDErrorContext;
-use crate::GDErrorKind::PacketBad;
-use crate::GDErrorKind::PacketUnderflow;
 use crate::GDResult;
+use crate::PacketError::{PacketBad, PacketUnderflow};
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
 use std::{convert::TryInto, marker::PhantomData};
 
@@ -550,7 +549,7 @@ mod tests {
         let result: Result<u32, _> = buffer.read();
         assert_eq!(
             result.unwrap_err(),
-            crate::GDErrorKind::PacketUnderflow.into()
+            crate::PacketError::PacketUnderflow.into()
         );
     }
 }

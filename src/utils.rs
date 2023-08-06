@@ -1,5 +1,5 @@
-use crate::GDErrorKind::{PacketOverflow, PacketUnderflow};
 use crate::GDResult;
+use crate::PacketError::{PacketOverflow, PacketUnderflow};
 use std::cmp::Ordering;
 
 pub fn error_by_expected_size(expected: usize, size: usize) -> GDResult<()> {

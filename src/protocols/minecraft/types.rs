@@ -9,8 +9,9 @@ use crate::{
         GenericResponse,
     },
     GDErrorContext,
-    GDErrorKind::{PacketBad, UnknownEnumCast},
+    GDErrorKind::UnknownEnumCast,
     GDResult,
+    PacketError::PacketBad,
 };
 
 use byteorder::ByteOrder;

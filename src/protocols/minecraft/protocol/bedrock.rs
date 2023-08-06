@@ -9,8 +9,9 @@ use crate::{
     socket::{Socket, UdpSocket},
     utils::error_by_expected_size,
     GDErrorContext,
-    GDErrorKind::{PacketBad, TypeParse},
+    GDErrorKind::TypeParse,
     GDResult,
+    PacketError::PacketBad,
 };
 
 use std::net::SocketAddr;

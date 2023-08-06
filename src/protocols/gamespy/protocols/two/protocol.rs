@@ -2,8 +2,9 @@ use crate::buffer::{Buffer, Utf8Decoder};
 use crate::protocols::gamespy::two::{Player, Response, Team};
 use crate::protocols::types::TimeoutSettings;
 use crate::socket::{Socket, UdpSocket};
-use crate::GDErrorKind::{PacketBad, TypeParse};
-use crate::{GDErrorContext, GDErrorKind, GDResult};
+use crate::GDErrorKind::TypeParse;
+use crate::PacketError::PacketBad;
+use crate::{GDErrorContext, GDResult};
 use byteorder::BigEndian;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -16,9 +17,9 @@ macro_rules! table_extract {
     ($table:expr, $name:literal, $index:expr) => {
         $table
             .get($name)
-            .ok_or(GDErrorKind::PacketBad)?
+            .ok_or(PacketBad)?
             .get($index)
-            .ok_or(GDErrorKind::PacketBad)?
+            .ok_or(PacketBad)?
     };
 }
 
@@ -32,7 +33,7 @@ macro_rules! table_extract_parse {
 
 fn data_as_table(data: &mut Buffer<BigEndian>) -> GDResult<(HashMap<String, Vec<String>>, usize)> {
     if data.read::<u8>()? != 0 {
-        Err(GDErrorKind::PacketBad)?
+        Err(PacketBad)?
     }
 
     let rows = data.read::<u8>()? as usize;
@@ -65,10 +66,7 @@ fn data_as_table(data: &mut Buffer<BigEndian>) -> GDResult<(HashMap<String, Vec<
     for _ in 0 .. rows {
         for column in column_heads.iter() {
             let value = data.read_string::<Utf8Decoder>(None)?;
-            table
-                .get_mut(column)
-                .ok_or(GDErrorKind::PacketBad)?
-                .push(value);
+            table.get_mut(column).ok_or(PacketBad)?.push(value);
         }
     }
 
