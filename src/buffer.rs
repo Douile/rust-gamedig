@@ -1,3 +1,4 @@
+use crate::errors::GDErrorContext;
 use crate::GDErrorKind::PacketBad;
 use crate::GDErrorKind::PacketUnderflow;
 use crate::GDResult;

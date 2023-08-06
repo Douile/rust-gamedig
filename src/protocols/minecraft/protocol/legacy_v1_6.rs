@@ -8,6 +8,7 @@ use crate::{
     },
     socket::{Socket, TcpSocket},
     utils::error_by_expected_size,
+    GDErrorContext,
     GDErrorKind::{PacketBad, ProtocolFormat},
     GDResult,
 };

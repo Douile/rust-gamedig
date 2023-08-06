@@ -8,6 +8,7 @@ use crate::{
         types::{CommonPlayer, CommonResponse, GenericPlayer},
         GenericResponse,
     },
+    GDErrorContext,
     GDErrorKind::{PacketBad, UnknownEnumCast},
     GDResult,
 };

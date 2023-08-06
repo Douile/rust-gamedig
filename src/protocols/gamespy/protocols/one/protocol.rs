@@ -11,6 +11,7 @@ use crate::{
         types::TimeoutSettings,
     },
     socket::{Socket, UdpSocket},
+    GDErrorContext,
     GDErrorKind,
     GDResult,
 };

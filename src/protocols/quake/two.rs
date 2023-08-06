@@ -3,7 +3,7 @@ use crate::protocols::quake::one::QuakeOne;
 use crate::protocols::quake::Response;
 use crate::protocols::types::{CommonPlayer, GenericPlayer, TimeoutSettings};
 use crate::GDErrorKind::TypeParse;
-use crate::{GDErrorKind, GDResult};
+use crate::{GDErrorContext, GDErrorKind, GDResult};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;

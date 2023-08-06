@@ -3,7 +3,7 @@ use crate::protocols::gamespy::two::{Player, Response, Team};
 use crate::protocols::types::TimeoutSettings;
 use crate::socket::{Socket, UdpSocket};
 use crate::GDErrorKind::{PacketBad, TypeParse};
-use crate::{GDErrorKind, GDResult};
+use crate::{GDErrorContext, GDErrorKind, GDResult};
 use byteorder::BigEndian;
 use std::collections::HashMap;
 use std::net::SocketAddr;

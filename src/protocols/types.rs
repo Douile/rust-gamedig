@@ -1,6 +1,6 @@
 use crate::protocols::{gamespy, minecraft, quake, valve};
 use crate::GDErrorKind::InvalidInput;
-use crate::GDResult;
+use crate::{GDErrorContext, GDResult};
 
 use std::time::Duration;
 

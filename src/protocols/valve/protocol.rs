@@ -21,6 +21,7 @@ use crate::{
     },
     socket::{Socket, UdpSocket},
     utils::u8_lower_upper,
+    GDErrorContext,
     GDErrorKind::{BadGame, Decompress, UnknownEnumCast},
     GDResult,
 };

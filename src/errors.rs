@@ -1,5 +1,4 @@
 use std::{
-    backtrace,
     error::Error,
     fmt::{self, Formatter},
 };
@@ -42,17 +41,29 @@ pub enum GDErrorKind {
     TypeParse,
 }
 
-impl GDErrorKind {
-    /// Convert error kind into a full error with a source (and implicit
-    /// backtrace)
+/// Allow converting a type to GDError with "context" (a source error)
+pub trait GDErrorContext
+where Self: Sized {
+    /// Convert into a full error possibly with a source
+    fn raw_context(self, source: Option<Box<dyn std::error::Error + 'static>>) -> GDError;
+
+    /// Convert into a full error with a source (implemented using raw_context)
     ///
     /// ```
-    /// use gamedig::{GDErrorKind, GDResult};
+    /// use gamedig::{GDErrorKind, GDResult, GDErrorContext};
     /// let _: GDResult<u32> = "thing".parse().map_err(|e| GDErrorKind::TypeParse.context(e));
     /// ```
-    pub fn context<E: Into<Box<dyn std::error::Error + 'static>>>(self, source: E) -> GDError {
-        GDError::from_error(self, source)
+    fn context<E: Into<Box<dyn std::error::Error + 'static>>>(self, source: E) -> GDError {
+        self.raw_context(Some(source.into()))
     }
+}
+
+impl<T: GDErrorContext> From<T> for GDError {
+    fn from(value: T) -> Self { value.raw_context(None) }
+}
+
+impl GDErrorContext for GDErrorKind {
+    fn raw_context(self, source: Option<Box<dyn std::error::Error + 'static>>) -> GDError { GDError::new(self, source) }
 }
 
 type ErrorSource = Box<dyn std::error::Error + 'static>;
@@ -65,7 +76,7 @@ type ErrorSource = Box<dyn std::error::Error + 'static>;
 /// Directly from an [error kind](crate::errors::GDErrorKind) (without a source)
 ///
 /// ```
-/// use gamedig::{GDError, GDErrorKind};
+/// use gamedig::{GDError, GDErrorKind, GDErrorContext};
 /// let _: GDError = GDErrorKind::PacketBad.into();
 /// ```
 ///
@@ -73,7 +84,7 @@ type ErrorSource = Box<dyn std::error::Error + 'static>;
 /// type that implements `Into<Box<dyn std::error::Error + 'static>>)
 ///
 /// ```
-/// use gamedig::{GDError, GDErrorKind};
+/// use gamedig::{GDError, GDErrorKind, GDErrorContext};
 /// let _: GDError = GDErrorKind::PacketBad.context("Reason the packet was bad");
 /// ```
 ///
@@ -87,17 +98,6 @@ pub struct GDError {
     pub kind: GDErrorKind,
     pub source: Option<ErrorSource>,
     pub backtrace: Option<std::backtrace::Backtrace>,
-}
-
-impl From<GDErrorKind> for GDError {
-    fn from(value: GDErrorKind) -> Self {
-        let backtrace = Some(backtrace::Backtrace::capture());
-        Self {
-            kind: value,
-            source: None,
-            backtrace,
-        }
-    }
 }
 
 impl PartialEq for GDError {

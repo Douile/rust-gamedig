@@ -1,4 +1,4 @@
-use crate::{GDErrorKind, GDResult};
+use crate::{GDErrorContext, GDErrorKind, GDResult};
 use std::collections::HashMap;
 
 pub fn has_password(server_vars: &mut HashMap<String, String>) -> GDResult<bool> {

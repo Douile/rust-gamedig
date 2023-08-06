@@ -1,5 +1,6 @@
 use crate::{
     protocols::valve::{self, game, SteamApp},
+    GDErrorContext,
     GDErrorKind::TypeParse,
     GDResult,
 };
